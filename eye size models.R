@@ -19,8 +19,6 @@ Final_Dataset$Observer <- as.factor(Final_Dataset$Observer)
 #Check if all characters are set to factors. 
 str(Final_Dataset)
 
-install.packages("performance")
-
 #Model Selection using 'performance'. 
 #Load the performance package. 
 library(performance)
@@ -116,48 +114,37 @@ plot(compare_performance(model1, model2, rank = TRUE))
 #model2 is not a statistically significantly better fit than model1, but based on BIC, AICc, and AIC,
 #Model2 is better. 
 
+
+#Re-running model with residuals extracted from regression. 
+
+#Detach the performance package first, since it interferes with base R commands (e.g., plot()). 
+detach("package:performance")    
+
+#Run a regression with mean_diameter and scaled_mass_index to correct for body size. 
+resid_model <- glm(mean_diameter ~ scaled_mass_index, data = Final_Dataset)
+#Attach the residuals of this regression to the data frame. 
+Final_Dataset$residual_eye_size <- resid_model$residuals
+#Check normality of residuals by eyeballing a frequency histogram. 
+hist(Final_Dataset$residual_eye_size)
+
+model3 <- lmer(residual_eye_size ~ habitat + species + 
+                 habitat*species + 
+                 (1|Batch) + (1|site), 
+               data = Final_Dataset, REML = F)
+drop1(model3, test = "Chisq") #Since SMI was already controlled for by using residual eye size, 
+#it was removed from the model. This just leaves habitat and species as variables, as well as their interaction. 
+
+#Using performance package for diagnostics of new models. 
+library(performance)
+check_model(model3)
+model_performance(model3)
+
+
 #Plotting data. 
 
 library(RColorBrewer)
 library(ggstance)
 library(PupillometryR)
-
-p1 <- ggplot(Final_Dataset, 
-             aes(x=species, 
-                 y=mean_diameter, 
-                 color = species, 
-                 fill = habitat))  + 
-  geom_violin(trim = TRUE, 
-              alpha = 0.5, 
-              scale = "width") + 
-  geom_point(aes(color = species),
-             position = position_jitter(w = .15),
-             size = 1,
-             alpha = 1)
- 
-  #coord_flip() + 
-  
-+ 
-  geom_boxplot(outlier.shape = 8, 
-               outlier.size = 3,
-               outlier.fill = "black", 
-               alpha = 1, 
-               cex = 1, 
-               width = 0.5)
-
-p2 <- p1 + 
-  geom_density(aes(y=mean_diameter, color = species),
-               cex = 1,
-               inherit.aes = FALSE) + 
-  theme_classic() + 
-  scale_color_brewer(palette = "Dark2") 
-
-
-fill = habitat
-
-
-
-
 
 #Fancy Violin Plots: 
 p1 <- ggplot(Final_Dataset) +
@@ -193,5 +180,6 @@ p3 <- p2 + geom_boxplot(aes(color = habitat,),
   theme(legend.position = c(0.95, 0.2)) 
   
 print(p3)
+#I removed the second part of the legend in inkscape. 
 
 

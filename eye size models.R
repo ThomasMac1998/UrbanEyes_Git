@@ -78,6 +78,16 @@ model1 <- lmer(mean_diameter ~ habitat + species + scaled_mass_index +
                  (1|Batch) + (1|site), 
                data = Final_Dataset, REML = F) 
 
+#Calculating R2 for mixed models. 
+r2_nakagawa(model1)
+
+#Computing R2 without random effects. 
+model1R <- glm(mean_diameter ~ habitat + species + scaled_mass_index + 
+                 habitat*species + scaled_mass_index*species + scaled_mass_index*habitat, 
+               data = Final_Dataset) 
+#calculate R^2 with the r2() function. 
+r2(model1R)
+
 #Check model and calculate AIC, AICc, BIC, etc. 
 check_model(model1)
 model_performance(model1)
@@ -89,12 +99,26 @@ model2 <- lmer(mean_diameter ~ habitat + species + scaled_mass_index +
 check_model(model2)
 model_performance(model2)
 
+#Computing R2 without random effects. 
+model2R <- glm(mean_diameter ~ habitat + species + scaled_mass_index + 
+                 habitat*species + scaled_mass_index*species, 
+               data = Final_Dataset) 
+
+#calculate R^2 with the r2() function. 
+r2(model2R)
 #Comparing model1 and model2. 
 test_performance(model1, model2)
 
+#Visualization of model performance shows that both models are equally good. 
+plot(compare_performance(model1, model2, rank = TRUE))
 
+#Overall,a LRT tells us that 
+#model2 is not a statistically significantly better fit than model1, but based on BIC, AICc, and AIC,
+#Model2 is better. 
 
+#Plotting data. 
 
+ggplot(Final_Dataset, aes(x=species, y=mean_diameter, color = species)) + geom_point(position = "jitter") + geom_boxplot(alpha = 0)
 
 
 

@@ -118,13 +118,80 @@ plot(compare_performance(model1, model2, rank = TRUE))
 
 #Plotting data. 
 
-ggplot(Final_Dataset, aes(x=species, y=mean_diameter, color = species)) + geom_point(position = "jitter") + geom_boxplot(alpha = 0)
+library(RColorBrewer)
+library(ggstance)
+library(PupillometryR)
+
+p1 <- ggplot(Final_Dataset, 
+             aes(x=species, 
+                 y=mean_diameter, 
+                 color = species, 
+                 fill = habitat))  + 
+  geom_violin(trim = TRUE, 
+              alpha = 0.5, 
+              scale = "width") + 
+  geom_point(aes(color = species),
+             position = position_jitter(w = .15),
+             size = 1,
+             alpha = 1)
+ 
+  #coord_flip() + 
+  
++ 
+  geom_boxplot(outlier.shape = 8, 
+               outlier.size = 3,
+               outlier.fill = "black", 
+               alpha = 1, 
+               cex = 1, 
+               width = 0.5)
+
+p2 <- p1 + 
+  geom_density(aes(y=mean_diameter, color = species),
+               cex = 1,
+               inherit.aes = FALSE) + 
+  theme_classic() + 
+  scale_color_brewer(palette = "Dark2") 
+
+
+fill = habitat
 
 
 
 
 
+#Fancy Violin Plots: 
+p1 <- ggplot(Final_Dataset) +
+  aes(x = species,
+      y = mean_diameter,
+      fill = habitat) + #split plot by habitat and add a flat violin plot. 
+  geom_flat_violin(position = position_nudge(x = .2), #nudge the violin plot to the side to make room for the box/scatter plots.
+                   alpha = .6, ) +
+  scale_fill_manual(NULL, #Set custom colours for the plot. 
+                    values=c("orange","lightslategrey"),
+                    labels = c("Urban", "Rural"))
 
+p2 <- p1 + geom_point(aes(color = habitat), 
+             position = position_jitter(width = .15), #Jitter to show the data. 
+             size = 0.8, 
+             alpha = 1,
+             show.legend = F) 
 
+p3 <- p2 + geom_boxplot(aes(color = habitat,), 
+               width = .3, 
+               outlier.shape = NA,
+               alpha = 0, 
+               cex = 0.7) + 
+  labs(x = "Species", 
+       y = "Mean Visible Eye Diameter (mm)",
+       title = NULL) +
+  guides(fill = guide_legend(title="Habitat")) + 
+    theme(axis.text = element_text(size = 15), 
+          axis.title = element_text(size = 20), 
+          plot.title = element_text(size = 20)) + 
+  scale_color_manual(values = c("Urban" = "orange",
+                                "Rural" = "lightslategrey")) + 
+  theme(legend.position = c(0.95, 0.2)) 
+  
+print(p3)
 
 

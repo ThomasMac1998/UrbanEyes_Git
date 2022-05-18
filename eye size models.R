@@ -146,7 +146,7 @@ library(RColorBrewer)
 library(ggstance)
 library(PupillometryR)
 
-#Fancy Violin Plots: 
+#Raincloud plots of mean visible diamter.  
 p1 <- ggplot(Final_Dataset) +
   aes(x = species,
       y = mean_diameter,
@@ -180,6 +180,70 @@ p3 <- p2 + geom_boxplot(aes(color = habitat,),
   theme(legend.position = c(0.95, 0.2)) 
   
 print(p3)
+
+#Raincloud plots of residual eye size. 
+
+r1 <- ggplot(Final_Dataset) +
+  aes(x = species,
+      y = residual_eye_size,
+      fill = habitat) + #split plot by habitat and add a flat violin plot. 
+  geom_flat_violin(position = position_nudge(x = .2), #nudge the violin plot to the side to make room for the box/scatter plots.
+                   alpha = .6, ) + 
+scale_fill_manual(NULL, #Set custom colours for the plot. 
+                    values=c("lightslategrey","orange"),
+                    labels = c("Urban", "Rural"))
+
+r2 <- r1 + geom_point(aes(color = habitat), 
+                      position = position_jitter(width = .15), #Jitter to show the data. 
+                      size = 0.8, 
+                      alpha = 1,
+                      show.legend = F) 
+
+r3 <- r2 + geom_boxplot(aes(color = habitat,), 
+                        width = .3, 
+                        outlier.shape = NA,
+                        alpha = 0, 
+                        cex = 0.7) + 
+  labs(x = "Species", 
+       y = "Residual mean visible eye diameter (mm)",
+       title = NULL) +
+  guides(fill = guide_legend(title="Habitat")) + 
+  theme(axis.text = element_text(size = 15), 
+        axis.title = element_text(size = 20), 
+        plot.title = element_text(size = 20)) + 
+  scale_color_manual(values = c("Urban" = "orange",
+                                "Rural" = "lightslategrey")) + 
+  theme(legend.position = c(0.95, 0.2)) 
+
+print(r3)
+
 #I removed the second part of the legend in inkscape. 
 
+r1 <- ggplot(Final_Dataset) +
+  aes(x = species,
+      y = residual_eye_size,
+      fill = habitat) + #split plot by habitat and add a flat violin plot. 
+  geom_flat_violin(position = position_nudge(x = .2), #nudge the violin plot to the side to make room for the box/scatter plots.
+                   alpha = .6, ) 
 
+r2 <- r1 + geom_point(aes(color = habitat), 
+                      position = position_jitter(width = .15), #Jitter to show the data. 
+                      size = 0.8, 
+                      alpha = 1,
+                      show.legend = F) 
+
+r3 <- r2 + geom_boxplot(aes(color = habitat,), 
+                        width = .3, 
+                        outlier.shape = NA,
+                        alpha = 0, 
+                        cex = 0.7) + 
+  labs(x = "Species", 
+       y = "Residual mean visible eye diameter (mm)",
+       title = NULL) +
+  guides(fill = guide_legend(title="Habitat")) + 
+  theme(axis.text = element_text(size = 15), 
+        axis.title = element_text(size = 20), 
+        plot.title = element_text(size = 20))  + 
+  theme(legend.position = c(0.95, 0.2)) 
+
+print(r3)
